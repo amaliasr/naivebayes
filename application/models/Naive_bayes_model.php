@@ -9,6 +9,7 @@ class Naive_bayes_model extends CI_Model
     {
         $this->class_prob = $this->calculateClassProb($y_train);
         $this->word_prob = $this->calculateWordProb($X_train, $y_train);
+        return array('class_prob' => $this->class_prob, 'word_prob' => $this->word_prob);
     }
 
     private function calculateClassProb($y_train)
@@ -140,26 +141,28 @@ class Naive_bayes_model extends CI_Model
             }
 
             $predicted_label = array_search(max($class_scores), $class_scores);
-            $predictions[] = $predicted_label;
+            $highest_score = max($class_scores); // Skor tertinggi
+
+            $predictions[] = array(
+                'label' => $predicted_label,
+                'score' => $class_scores[$predicted_label], // Skor prediksi
+                'scores' => $class_scores, // Semua skor prediksi
+                'highest_score' => $highest_score // Skor tertinggi
+            );
         }
 
         return $predictions;
     }
+
+
     public function preprocess($text)
     {
-        // Case Folding
         $text = strtolower($text);
-        // Tokenizing
         $words = explode(' ', $text);
 
-        // Stopword Removal
-        $stopwords = $this->getStopwords(); // Mendapatkan daftar stopwords
+        $stopwords = $this->getStopwords();
         $words = array_diff($words, $stopwords);
-
-        // Stemming
         $words = $this->stem($words);
-
-        // Mengembalikan teks yang sudah dipreprocessing
         $text = implode(' ', $words);
 
         return $text;
@@ -167,21 +170,15 @@ class Naive_bayes_model extends CI_Model
 
     private function getStopwords()
     {
-        // Daftar stopwords yang ingin dihilangkan
         $stopwords = array('yang', 'dan', 'ke', 'dari', 'mana', 'itu', 'ini');
         return $stopwords;
     }
 
     private function stem($words)
     {
-        // Implementasi algoritma stemming yang sesuai dengan bahasa yang digunakan
-        // Misalnya, menggunakan algoritma Porter untuk Bahasa Inggris
-        // Anda dapat menggunakan library seperti "PorterStemmer" untuk melakukan stemming
-
-        // Contoh implementasi sederhana tanpa algoritma sebenarnya
         $stemmed_words = array();
         foreach ($words as $word) {
-            $stemmed_word = $this->customStemming($word); // Fungsi custom untuk stemming
+            $stemmed_word = $this->customStemming($word);
             $stemmed_words[] = $stemmed_word;
         }
 
@@ -190,10 +187,6 @@ class Naive_bayes_model extends CI_Model
 
     private function customStemming($word)
     {
-        // Implementasi algoritma stemming khusus sesuai dengan kebutuhan Anda
-        // Misalnya, menggunakan aturan-aturan tertentu untuk memotong akhiran kata
-
-        // Contoh implementasi sederhana tanpa algoritma sebenarnya
         if (substr($word, -3) == 'ing') {
             $word = substr($word, 0, -3);
         }

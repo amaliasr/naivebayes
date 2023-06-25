@@ -65,6 +65,9 @@ class Welcome extends CI_Controller
 			"warna tidak menarik",
 			"tidak menarik",
 			"harga murah",
+			"harga berapa",
+			"ukuran berapa",
+			"pakai warna apa ya",
 		);
 
 		$y_train = array(
@@ -79,20 +82,33 @@ class Welcome extends CI_Controller
 			"negatif",
 			"negatif",
 			"positif",
+			"netral",
+			"netral",
+			"netral",
 		);
 
 		// Contoh data uji
 		$X_test = $commentsArray;
 
 		// Melatih model Naive Bayes
-		$this->naive_bayes_model->train($X_train, $y_train);
+		$training_result = $this->naive_bayes_model->train($X_train, $y_train);
+		$class_prob = $training_result['class_prob'];
+		$word_prob = $training_result['word_prob'];
 
 		// Melakukan prediksi
 		$predictions = $this->naive_bayes_model->predict($X_test);
+		$predictionData = array();
+		foreach ($predictions as $prediction) {
+			$predictionData[] = array('label' => $prediction);
+		}
 
 		// Menampilkan hasil prediksi
+		$data['csvData'] = $csvData;
 		$data['commentsArray'] = $commentsArray;
 		$data['predictions'] = $predictions;
+		$data['predictions2'] = $predictionData;
+		$data['class_prob'] = $class_prob;
+		$data['word_prob'] = $word_prob;
 		$this->load->view('hasil', $data);
 	}
 }
